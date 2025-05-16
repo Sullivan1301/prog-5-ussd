@@ -1,14 +1,5 @@
 import { ITransaction } from './Transaction';
 
-export interface ITransaction {
-  id: string;
-  type: 'DEPOSIT' | 'WITHDRAWAL' | 'TRANSFER';
-  amount: number;
-  date: Date;
-  description: string;
-  recipientAccount?: string;
-}
-
 export class BankAccount {
   private _balance: number = 0;
   private _pin: string;
