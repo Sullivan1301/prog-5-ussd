@@ -3,27 +3,31 @@ import { MenuService } from './ussd/Menu';
 import { MainMenu } from './ussd/MainMenu';
 import { UI } from './ussd/UI';
 import { BankAccount } from './banking/BankAccount';
+import { SessionManager, InputValidator } from './ussd/SessionManager';
 
 class MVolaApp {
   private menuService: MenuService;
   private currentAccount: BankAccount | null = null;
+  private sessionManager: SessionManager;
 
   constructor() {
-    // Créer un compte de test pour la démonstration
+    this.sessionManager = new SessionManager();
     this.currentAccount = new BankAccount('1234567890', '1234');
-    const mainMenu = new MainMenu(null as any, this.currentAccount); // Initialiser avec null temporairement
+    const mainMenu = new MainMenu(null as any, this.currentAccount);
     this.menuService = new MenuService(mainMenu);
-    mainMenu.menuService = this.menuService; // Mettre à jour la référence
+    mainMenu.menuService = this.menuService;
   }
 
   public async start(): Promise<void> {
     UI.showInfo('Bienvenue sur MVola!');
 
-    // Demander le PIN
-    const pin = readlineSync.question('Veuillez entrer votre PIN: ', {
-      hideEchoBack: true,
-      mask: '*'
-    });
+    let pin: string;
+    do {
+      pin = readlineSync.question('Veuillez entrer votre PIN: ', {
+        hideEchoBack: true,
+        mask: '*'
+      });
+    } while (!InputValidator.validatePin(pin));
 
     if (!this.currentAccount?.verifyPin(pin)) {
       UI.showError('PIN incorrect. Veuillez réessayer.');
@@ -33,10 +37,15 @@ class MVolaApp {
     UI.showSuccess('Connexion réussie!');
 
     while (true) {
+      if (!this.sessionManager.checkSession()) {
+        break;
+      }
+
       const currentMenu = this.menuService.getCurrentMenu();
       currentMenu.display();
 
       const input = readlineSync.question('Votre choix: ');
+      this.sessionManager.updateActivity();
       this.menuService.handleInput(input);
     }
   }
