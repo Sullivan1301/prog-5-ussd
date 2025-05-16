@@ -1,9 +1,9 @@
-# Dépendances
+# Dependencies
 node_modules/
 package-lock.json
 yarn.lock
 
-# Fichiers compilés
+# Build output
 dist/
 build/
 out/
@@ -11,24 +11,10 @@ out/
 *.js.map
 *.d.ts
 
-# Fichiers générés par TypeScript
-tsconfig.tsbuildinfo
+# Test coverage
+coverage/
 
-# Fichiers de l'environnement
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# IDEs et éditeurs
+# IDE
 .idea/
 .vscode/
 *.sublime-project
@@ -44,18 +30,27 @@ yarn-error.log*
 *.sln
 *.sw?
 
-# Système d'exploitation
+# OS
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Coverage
-coverage/
-.nyc_output/
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Tests
-/test-results/
-/coverage/
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+*.tsbuildinfo
 
 # Cache
 .npm
@@ -69,11 +64,6 @@ coverage/
 # Fichiers temporaires
 *.tmp
 *.temp
-
-# Fichiers de build
-dist/
-build/
-out/
 
 # Fichiers de configuration locaux
 .eslintrc.local.js
