@@ -102,7 +102,7 @@ src/
 ├── models/            # Classes et interfaces
 ├── services/          # Services métier
 ├── utils/             # Fonctions utilitaires
-└── index.ts           # Point d'entrée
+└── BankAccount.ts           # Point d'entrée
 ```
 
 ### Tests
@@ -137,4 +137,4 @@ Le code PIN par défaut pour toutes les opérations sécurisées est : `1234`
 
 ## Licence
 
-MIT 
+MIT
