@@ -419,7 +419,7 @@ function drawSpinner(message: string, durationMs: number = 1500): void {
     process.stdout.write('\r' + ' '.repeat(message.length + 2) + '\r');
 }
 
-class BankAccount {
+export class BankAccount {
     private accountNumber: string;
     private balance: number;
     private pin: string;
