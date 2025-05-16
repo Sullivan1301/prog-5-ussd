@@ -2,6 +2,7 @@ import { Menu } from './Menu';
 import { MenuService } from './Menu';
 import { UI } from './UI';
 import { BankAccount } from '../banking/BankAccount';
+import { InputValidator } from './SessionManager';
 import readlineSync from 'readline-sync';
 
 export class BuyCreditMenu implements Menu {
@@ -46,7 +47,11 @@ export class BuyCreditMenu implements Menu {
     }
 
     private async buyCredit(): Promise<void> {
-        const amount = readlineSync.questionInt('Entrez le montant à acheter: ');
+        let amount: number;
+        do {
+            amount = readlineSync.questionInt('Entrez le montant à acheter: ');
+        } while (!InputValidator.validateAmount(amount));
+
         try {
             await UI.drawSpinner('Achat en cours...', 2000);
             this.account.deposit(amount);
@@ -64,12 +69,10 @@ export class BuyCreditMenu implements Menu {
         ];
 
         UI.drawBox('Offres Yas disponibles', offers);
-        const choice = readlineSync.questionInt('Choisissez une offre (1-3): ');
-
-        if (choice < 1 || choice > 3) {
-            UI.showError('Offre invalide.');
-            return;
-        }
+        let choice: number;
+        do {
+            choice = readlineSync.questionInt('Choisissez une offre (1-3): ');
+        } while (choice < 1 || choice > 3);
 
         try {
             await UI.drawSpinner('Activation de l\'offre...', 2000);
@@ -128,8 +131,15 @@ export class TransferMenu implements Menu {
     }
 
     private async transferToMvola(): Promise<void> {
-        const recipient = readlineSync.question('Numéro MVola du destinataire: ');
-        const amount = readlineSync.questionInt('Montant à transférer: ');
+        let recipient: string;
+        do {
+            recipient = readlineSync.question('Numéro MVola du destinataire: ');
+        } while (!InputValidator.validatePhoneNumber(recipient));
+
+        let amount: number;
+        do {
+            amount = readlineSync.questionInt('Montant à transférer: ');
+        } while (!InputValidator.validateAmount(amount));
 
         try {
             await UI.drawSpinner('Transfert en cours...', 2000);
@@ -141,8 +151,15 @@ export class TransferMenu implements Menu {
     }
 
     private async transferToBank(): Promise<void> {
-        const accountNumber = readlineSync.question('Numéro de compte bancaire: ');
-        const amount = readlineSync.questionInt('Montant à transférer: ');
+        let accountNumber: string;
+        do {
+            accountNumber = readlineSync.question('Numéro de compte bancaire: ');
+        } while (!InputValidator.validateAccountNumber(accountNumber));
+
+        let amount: number;
+        do {
+            amount = readlineSync.questionInt('Montant à transférer: ');
+        } while (!InputValidator.validateAmount(amount));
 
         try {
             await UI.drawSpinner('Transfert en cours...', 2000);
@@ -204,7 +221,11 @@ export class MvolaCreditMenu implements Menu {
     }
 
     private async requestCredit(): Promise<void> {
-        const amount = readlineSync.questionInt('Montant du crédit souhaité: ');
+        let amount: number;
+        do {
+            amount = readlineSync.questionInt('Montant du crédit souhaité: ');
+        } while (!InputValidator.validateAmount(amount));
+
         try {
             await UI.drawSpinner('Demande de crédit en cours...', 2000);
             this.account.deposit(amount);
@@ -215,7 +236,11 @@ export class MvolaCreditMenu implements Menu {
     }
 
     private async repayCredit(): Promise<void> {
-        const amount = readlineSync.questionInt('Montant à rembourser: ');
+        let amount: number;
+        do {
+            amount = readlineSync.questionInt('Montant à rembourser: ');
+        } while (!InputValidator.validateAmount(amount));
+
         try {
             await UI.drawSpinner('Remboursement en cours...', 2000);
             this.account.withdraw(amount);
@@ -282,8 +307,15 @@ export class WithdrawMenu implements Menu {
     }
 
     private async withdrawFromAgent(): Promise<void> {
-        const amount = readlineSync.questionInt('Montant à retirer: ');
-        const agentCode = readlineSync.question('Code de l\'agent: ');
+        let amount: number;
+        do {
+            amount = readlineSync.questionInt('Montant à retirer: ');
+        } while (!InputValidator.validateAmount(amount));
+
+        let agentCode: string;
+        do {
+            agentCode = readlineSync.question('Code de l\'agent: ');
+        } while (!InputValidator.validateAgentCode(agentCode));
 
         try {
             await UI.drawSpinner('Retrait en cours...', 2000);
@@ -295,8 +327,15 @@ export class WithdrawMenu implements Menu {
     }
 
     private async withdrawFromATM(): Promise<void> {
-        const amount = readlineSync.questionInt('Montant à retirer: ');
-        const atmCode = readlineSync.question('Code du distributeur: ');
+        let amount: number;
+        do {
+            amount = readlineSync.questionInt('Montant à retirer: ');
+        } while (!InputValidator.validateAmount(amount));
+
+        let atmCode: string;
+        do {
+            atmCode = readlineSync.question('Code du distributeur: ');
+        } while (!InputValidator.validateAgentCode(atmCode));
 
         try {
             await UI.drawSpinner('Retrait en cours...', 2000);
