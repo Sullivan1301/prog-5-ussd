@@ -49,6 +49,7 @@ export class BuyCreditMenu implements Menu {
         const amount = readlineSync.questionInt('Entrez le montant à acheter: ');
         try {
             await UI.drawSpinner('Achat en cours...', 2000);
+            this.account.deposit(amount);
             UI.showSuccess(`Crédit de ${UI.formatAmount(amount)} acheté avec succès!`);
         } catch (error) {
             UI.showError('Erreur lors de l\'achat du crédit.');
@@ -72,7 +73,9 @@ export class BuyCreditMenu implements Menu {
 
         try {
             await UI.drawSpinner('Activation de l\'offre...', 2000);
-            UI.showSuccess(`Offre Yas activée avec succès!`);
+            const amount = choice * 1000;
+            this.account.deposit(amount);
+            UI.showSuccess(`Offre Yas de ${UI.formatAmount(amount)} activée avec succès!`);
         } catch (error) {
             UI.showError('Erreur lors de l\'activation de l\'offre.');
         }
@@ -147,6 +150,160 @@ export class TransferMenu implements Menu {
             UI.showSuccess(`Transfert de ${UI.formatAmount(amount)} effectué avec succès!`);
         } catch (error) {
             UI.showError('Erreur lors du transfert.');
+        }
+    }
+
+    public display(): void {
+        UI.drawBox(this.message, this.options.map((opt, index) => `${index + 1}. ${opt}`));
+    }
+}
+
+export class MvolaCreditMenu implements Menu {
+    private readonly options = [
+        'Demander un crédit',
+        'Rembourser un crédit',
+        'Voir mes crédits',
+        'Retour'
+    ];
+
+    constructor(
+        private menuService: MenuService,
+        private account: BankAccount
+    ) { }
+
+    public get message(): string {
+        return 'Mvola Credit ou Epargne';
+    }
+
+    public getOptions(): string[] {
+        return this.options;
+    }
+
+    public handleInput(input: string): void {
+        const choice = parseInt(input, 10);
+
+        if (isNaN(choice) || choice < 1 || choice > this.options.length) {
+            UI.showError('Option invalide. Veuillez réessayer.');
+            return;
+        }
+
+        switch (choice) {
+            case 1:
+                this.requestCredit();
+                break;
+            case 2:
+                this.repayCredit();
+                break;
+            case 3:
+                this.viewCredits();
+                break;
+            case 4:
+                this.menuService.goBack();
+                break;
+        }
+    }
+
+    private async requestCredit(): Promise<void> {
+        const amount = readlineSync.questionInt('Montant du crédit souhaité: ');
+        try {
+            await UI.drawSpinner('Demande de crédit en cours...', 2000);
+            this.account.deposit(amount);
+            UI.showSuccess(`Crédit de ${UI.formatAmount(amount)} accordé avec succès!`);
+        } catch (error) {
+            UI.showError('Erreur lors de la demande de crédit.');
+        }
+    }
+
+    private async repayCredit(): Promise<void> {
+        const amount = readlineSync.questionInt('Montant à rembourser: ');
+        try {
+            await UI.drawSpinner('Remboursement en cours...', 2000);
+            this.account.withdraw(amount);
+            UI.showSuccess(`Remboursement de ${UI.formatAmount(amount)} effectué avec succès!`);
+        } catch (error) {
+            UI.showError('Erreur lors du remboursement.');
+        }
+    }
+
+    private viewCredits(): void {
+        const balance = this.account.getBalance();
+        const content = [
+            `Solde actuel: ${UI.formatAmount(balance)}`,
+            '',
+            '1. Retour'
+        ];
+        UI.drawBox('Mes crédits', content);
+    }
+
+    public display(): void {
+        UI.drawBox(this.message, this.options.map((opt, index) => `${index + 1}. ${opt}`));
+    }
+}
+
+export class WithdrawMenu implements Menu {
+    private readonly options = [
+        'Retrait auprès d\'un agent',
+        'Retrait auprès d\'un distributeur',
+        'Retour'
+    ];
+
+    constructor(
+        private menuService: MenuService,
+        private account: BankAccount
+    ) { }
+
+    public get message(): string {
+        return 'Retrait argent';
+    }
+
+    public getOptions(): string[] {
+        return this.options;
+    }
+
+    public handleInput(input: string): void {
+        const choice = parseInt(input, 10);
+
+        if (isNaN(choice) || choice < 1 || choice > this.options.length) {
+            UI.showError('Option invalide. Veuillez réessayer.');
+            return;
+        }
+
+        switch (choice) {
+            case 1:
+                this.withdrawFromAgent();
+                break;
+            case 2:
+                this.withdrawFromATM();
+                break;
+            case 3:
+                this.menuService.goBack();
+                break;
+        }
+    }
+
+    private async withdrawFromAgent(): Promise<void> {
+        const amount = readlineSync.questionInt('Montant à retirer: ');
+        const agentCode = readlineSync.question('Code de l\'agent: ');
+
+        try {
+            await UI.drawSpinner('Retrait en cours...', 2000);
+            this.account.withdraw(amount);
+            UI.showSuccess(`Retrait de ${UI.formatAmount(amount)} effectué avec succès auprès de l'agent ${agentCode}!`);
+        } catch (error) {
+            UI.showError('Erreur lors du retrait.');
+        }
+    }
+
+    private async withdrawFromATM(): Promise<void> {
+        const amount = readlineSync.questionInt('Montant à retirer: ');
+        const atmCode = readlineSync.question('Code du distributeur: ');
+
+        try {
+            await UI.drawSpinner('Retrait en cours...', 2000);
+            this.account.withdraw(amount);
+            UI.showSuccess(`Retrait de ${UI.formatAmount(amount)} effectué avec succès au distributeur ${atmCode}!`);
+        } catch (error) {
+            UI.showError('Erreur lors du retrait.');
         }
     }
 

@@ -1,7 +1,7 @@
 import { Menu } from './Menu';
 import { UI } from './UI';
 import { MenuService } from './Menu';
-import { BuyCreditMenu, TransferMenu, BalanceMenu } from './SubMenus';
+import { BuyCreditMenu, TransferMenu, MvolaCreditMenu, WithdrawMenu, BalanceMenu } from './SubMenus';
 import { BankAccount } from '../banking/BankAccount';
 
 export class MainMenu implements Menu {
@@ -43,12 +43,10 @@ export class MainMenu implements Menu {
                 this.menuService.navigateTo(new TransferMenu(this.menuService, this.account));
                 break;
             case 3:
-                // TODO: Implémenter le menu Mvola Credit
-                UI.showInfo('Fonctionnalité en cours de développement');
+                this.menuService.navigateTo(new MvolaCreditMenu(this.menuService, this.account));
                 break;
             case 4:
-                // TODO: Implémenter le menu de retrait
-                UI.showInfo('Fonctionnalité en cours de développement');
+                this.menuService.navigateTo(new WithdrawMenu(this.menuService, this.account));
                 break;
             case 5:
                 this.menuService.navigateTo(new BalanceMenu(this.menuService, this.account));
