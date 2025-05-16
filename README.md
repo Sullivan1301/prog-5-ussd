@@ -1,140 +1,91 @@
-# Application USSD Bancaire
+# MVola - Application USSD
 
-Une application terminal simulant un service USSD bancaire, écrite en TypeScript.
+Une application de simulation de service bancaire mobile USSD, similaire à MVola, développée en TypeScript.
 
-## Fonctionnalités
+## 🚀 Fonctionnalités
 
-- Consultation du solde
-- Dépôt d'argent
-- Retrait d'argent (sécurisé par code PIN)
-- Transfert entre comptes (sécurisé par code PIN)
-- Historique des transactions (sécurisé par code PIN)
-- Interface utilisateur avec barres de progression et effets visuels
-- Timeout de session après 5 secondes d'inactivité
+- **Authentification sécurisée** avec PIN
+- **Gestion de compte** avec solde et transactions
+- **Services disponibles** :
+  - Achat de crédit et offres Yas
+  - Transfert d'argent (vers MVola ou compte bancaire)
+  - Service de crédit et épargne
+  - Retrait d'argent (agent ou ATM)
+  - Consultation de solde
 
-## Prérequis
+## 📋 Prérequis
 
-- Node.js (v20 ou supérieur)
-- npm ou yarn
+- Node.js (version 14 ou supérieure)
+- npm (généralement installé avec Node.js)
 
-## Installation
+## 🛠️ Installation
 
-```bash
-# Cloner le dépôt
-git clone https://github.com/votre-nom/ussd-banking-app.git
-cd ussd-banking-app
+1. Clonez le dépôt :
+   ```bash
+   git clone https://github.com/Sullivan1301/prog-5-ussd.git
+   cd prog-5-ussd
+   ```
 
-# Installer les dépendances
-npm install
-# ou
-yarn install
-```
+2. Installez les dépendances :
+   ```bash
+   npm install
+   ```
 
-## Utilisation
+## 🚀 Utilisation
 
-```bash
-# Démarrer l'application
-npm start
-# ou
-yarn start
-```
+1. Démarrez l'application :
+   ```bash
+   npm start
+   ```
 
-## Développement
+2. Suivez les instructions à l'écran :
+   - Entrez le PIN (par défaut : 1234)
+   - Naviguez dans les menus avec les numéros correspondants
+   - Suivez les instructions pour chaque opération
 
-### Scripts disponibles
-
-```bash
-# Lancer l'application en mode développement
-npm run dev
-
-# Exécuter les tests
-npm test
-
-# Exécuter les tests en mode watch
-npm run test:watch
-
-# Vérifier le code avec ESLint
-npm run lint
-
-# Corriger automatiquement les erreurs de style
-npm run lint:fix
-```
-
-### Conventions de code
-
-#### Nommage
-
-- **Variables et fonctions** : camelCase
-  ```typescript
-  const userAccount = new BankAccount();
-  function calculateBalance() {}
-  ```
-
-- **Classes et Interfaces** : PascalCase
-  ```typescript
-  class BankAccount {}
-  interface Transaction {}
-  ```
-
-- **Constantes** : UPPER_SNAKE_CASE
-  ```typescript
-  const MAX_ATTEMPTS = 3;
-  ```
-
-- **Membres privés** : camelCase avec underscore préfixé
-  ```typescript
-  private _balance: number;
-  ```
-
-#### Style de code
-
-- Indentation : 4 espaces
-- Guillemets : simples ('')
-- Point-virgule : obligatoire
-- Types : explicites
-- Accessibilité des membres : explicite (public/private)
-
-#### Structure des fichiers
+## 🎯 Structure du Projet
 
 ```
 src/
-├── __tests__/          # Tests unitaires
-├── models/            # Classes et interfaces
-├── services/          # Services métier
-├── utils/             # Fonctions utilitaires
-└── BankAccount.ts           # Point d'entrée
+├── banking/           # Logique bancaire
+│   ├── BankAccount.ts # Gestion du compte
+│   └── Transaction.ts # Types de transactions
+├── ussd/             # Interface USSD
+│   ├── Menu.ts       # Gestion des menus
+│   ├── MainMenu.ts   # Menu principal
+│   ├── SubMenus.ts   # Sous-menus
+│   ├── UI.ts         # Interface utilisateur
+│   └── SessionManager.ts # Gestion de session
+└── index.ts          # Point d'entrée
 ```
 
-### Tests
+## 🛡️ Sécurité
 
-Les tests sont écrits avec Jest et doivent être placés dans le dossier `__tests__` ou avoir l'extension `.test.ts` ou `.spec.ts`.
+- Session limitée à 5 minutes d'inactivité
+- Limite de tentatives de PIN (3 essais)
+- Validation des entrées utilisateur
+- Gestion sécurisée des transactions
 
-```typescript
-describe('BankAccount', () => {
-    it('should create a new account', () => {
-        // Test code
-    });
-});
+## 🧪 Tests
+
+Pour exécuter les tests :
+```bash
+npm test
 ```
 
-### Intégration Continue
+## 📝 Licence
 
-Le projet utilise GitHub Actions pour l'intégration continue. À chaque push sur la branche principale :
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
-1. Le linter (ESLint) vérifie le style du code
-2. Les tests unitaires sont exécutés
-3. Les rapports de couverture sont générés
+## 👥 Contribution
 
-## Code PIN par défaut
+Les contributions sont les bienvenues ! N'hésitez pas à :
+1. Fork le projet
+2. Créer une branche pour votre fonctionnalité
+3. Commiter vos changements
+4. Pousser vers la branche
+5. Ouvrir une Pull Request
 
-Le code PIN par défaut pour toutes les opérations sécurisées est : `1234`
+## 📧 Contact
 
-## Navigation
-
-- Utilisez les numéros (1-6) pour naviguer dans le menu principal
-- Utilisez `0` pour revenir au menu principal depuis n'importe quel sous-menu
-- La session expire automatiquement après 5 secondes d'inactivité
-
-## Licence
-
-MIT
+Pour toute question ou suggestion, n'hésitez pas à ouvrir une issue sur GitHub.
