@@ -6,16 +6,16 @@ import { BankAccount } from './banking/BankAccount';
 import { SessionManager, InputValidator } from './ussd/SessionManager';
 
 class MVolaApp {
-  private menuService: MenuService;
-  private currentAccount: BankAccount | null = null;
-  private sessionManager: SessionManager;
+  private _menuService: MenuService;
+  private _currentAccount: BankAccount | null = null;
+  private _sessionManager: SessionManager;
 
-  constructor() {
-    this.sessionManager = new SessionManager();
-    this.currentAccount = new BankAccount('1234567890', '1234');
-    const mainMenu = new MainMenu(null as any, this.currentAccount);
-    this.menuService = new MenuService(mainMenu);
-    mainMenu.menuService = this.menuService;
+  public constructor() {
+    this._sessionManager = new SessionManager();
+    this._currentAccount = new BankAccount('1234567890', '1234');
+    const mainMenu = new MainMenu(null as unknown as MenuService, this._currentAccount);
+    this._menuService = new MenuService(mainMenu);
+    mainMenu.menuService = this._menuService;
   }
 
   public async start(): Promise<void> {
@@ -25,35 +25,37 @@ class MVolaApp {
     do {
       pin = readlineSync.question('Veuillez entrer votre PIN: ', {
         hideEchoBack: true,
-        mask: '*'
+        mask: '*',
       });
     } while (!InputValidator.validatePin(pin));
 
-    if (!this.currentAccount?.verifyPin(pin)) {
+    if (!this._currentAccount?.verifyPin(pin)) {
       UI.showError('PIN incorrect. Veuillez réessayer.');
       process.exit(1);
     }
 
     UI.showSuccess('Connexion réussie!');
 
-    while (true) {
-      if (!this.sessionManager.checkSession()) {
+    let isRunning = true;
+    while (isRunning) {
+      if (!this._sessionManager.checkSession()) {
+        isRunning = false;
         break;
       }
 
-      const currentMenu = this.menuService.getCurrentMenu();
+      const currentMenu = this._menuService.getCurrentMenu();
       currentMenu.display();
 
       const input = readlineSync.question('Votre choix: ');
-      this.sessionManager.updateActivity();
-      this.menuService.handleInput(input);
+      this._sessionManager.updateActivity();
+      this._menuService.handleInput(input);
     }
   }
 }
 
 // Démarrer l'application
 const app = new MVolaApp();
-app.start().catch(error => {
+app.start().catch((error: Error) => {
   UI.showError(`Une erreur est survenue: ${error.message}`);
   process.exit(1);
 });

@@ -1,6 +1,6 @@
-import { TransactionRecord, TransactionType } from "./Transaction";
+import { ITransaction } from './Transaction';
 
-export interface Transaction {
+export interface ITransaction {
   id: string;
   type: 'DEPOSIT' | 'WITHDRAWAL' | 'TRANSFER';
   amount: number;
@@ -10,41 +10,41 @@ export interface Transaction {
 }
 
 export class BankAccount {
-  private balance: number = 0;
-  private pin: string;
-  private accountNumber: string;
-  private transactions: Transaction[] = [];
-  private pinAttempts: number = 0;
-  private readonly MAX_PIN_ATTEMPTS: number = 3;
+  private _balance: number = 0;
+  private _pin: string;
+  private _accountNumber: string;
+  private _transactions: ITransaction[] = [];
+  private _pinAttempts: number = 0;
+  private readonly _maxPinAttempts: number = 3;
 
-  constructor(accountNumber: string, initialPin: string) {
-    this.accountNumber = accountNumber;
-    this.pin = initialPin;
+  public constructor(accountNumber: string, initialPin: string) {
+    this._accountNumber = accountNumber;
+    this._pin = initialPin;
   }
 
   public getAccountNumber(): string {
-    return this.accountNumber;
+    return this._accountNumber;
   }
 
   public getBalance(): number {
-    return this.balance;
+    return this._balance;
   }
 
-  public getTransactions(): Transaction[] {
-    return [...this.transactions];
+  public getTransactions(): ITransaction[] {
+    return [...this._transactions];
   }
 
   public verifyPin(pin: string): boolean {
-    if (this.pinAttempts >= this.MAX_PIN_ATTEMPTS) {
+    if (this._pinAttempts >= this._maxPinAttempts) {
       throw new Error('Compte bloqué. Trop de tentatives incorrectes.');
     }
 
-    if (this.pin === pin) {
-      this.pinAttempts = 0;
+    if (this._pin === pin) {
+      this._pinAttempts = 0;
       return true;
     }
 
-    this.pinAttempts++;
+    this._pinAttempts++;
     return false;
   }
 
@@ -53,13 +53,13 @@ export class BankAccount {
       throw new Error('Le montant doit être supérieur à 0');
     }
 
-    this.balance += amount;
-    this.addTransaction({
-      id: this.generateTransactionId(),
+    this._balance += amount;
+    this._addTransaction({
+      id: this._generateTransactionId(),
       type: 'DEPOSIT',
       amount,
       date: new Date(),
-      description: 'Dépôt'
+      description: 'Dépôt',
     });
   }
 
@@ -68,17 +68,17 @@ export class BankAccount {
       throw new Error('Le montant doit être supérieur à 0');
     }
 
-    if (amount > this.balance) {
+    if (amount > this._balance) {
       throw new Error('Solde insuffisant');
     }
 
-    this.balance -= amount;
-    this.addTransaction({
-      id: this.generateTransactionId(),
+    this._balance -= amount;
+    this._addTransaction({
+      id: this._generateTransactionId(),
       type: 'WITHDRAWAL',
       amount,
       date: new Date(),
-      description: 'Retrait'
+      description: 'Retrait',
     });
   }
 
@@ -87,26 +87,26 @@ export class BankAccount {
       throw new Error('Le montant doit être supérieur à 0');
     }
 
-    if (amount > this.balance) {
+    if (amount > this._balance) {
       throw new Error('Solde insuffisant');
     }
 
-    this.balance -= amount;
-    this.addTransaction({
-      id: this.generateTransactionId(),
+    this._balance -= amount;
+    this._addTransaction({
+      id: this._generateTransactionId(),
       type: 'TRANSFER',
       amount,
       date: new Date(),
       description: 'Transfert',
-      recipientAccount
+      recipientAccount,
     });
   }
 
-  private addTransaction(transaction: Transaction): void {
-    this.transactions.push(transaction);
+  private _addTransaction(transaction: ITransaction): void {
+    this._transactions.push(transaction);
   }
 
-  private generateTransactionId(): string {
+  private _generateTransactionId(): string {
     return Math.random().toString(36).substring(2, 15);
   }
 }

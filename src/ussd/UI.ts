@@ -2,93 +2,72 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 export class UI {
-    private static readonly BOX_WIDTH = 50;
-    private static readonly BOX_CHAR = '─';
-    private static readonly BOX_VERTICAL = '│';
-    private static readonly BOX_CORNER_TL = '┌';
-    private static readonly BOX_CORNER_TR = '┐';
-    private static readonly BOX_CORNER_BL = '└';
-    private static readonly BOX_CORNER_BR = '┘';
+  private static readonly _boxWidth: number = 40;
+  private static readonly _boxChar: string = '─';
+  private static readonly _boxVertical: string = '│';
+  private static readonly _boxCornerTl: string = '┌';
+  private static readonly _boxCornerTr: string = '┐';
+  private static readonly _boxCornerBl: string = '└';
+  private static readonly _boxCornerBr: string = '┘';
 
-    public static drawBox(title: string, content: string[]): void {
-        const titleLine = ` ${title} `;
-        const titlePadding = Math.floor((this.BOX_WIDTH - titleLine.length) / 2);
+  /* eslint-disable no-console */
+  public static showInfo(message: string): void {
+    console.log(chalk.blue('ℹ'), message);
+  }
 
-        // Top border with title
-        console.log(
-            chalk.blue(
-                this.BOX_CORNER_TL +
-                this.BOX_CHAR.repeat(titlePadding) +
-                chalk.bold(titleLine) +
-                this.BOX_CHAR.repeat(this.BOX_WIDTH - titlePadding - titleLine.length) +
-                this.BOX_CORNER_TR
-            )
-        );
+  public static showSuccess(message: string): void {
+    console.log(chalk.green('✓'), message);
+  }
 
-        // Content
-        content.forEach(line => {
-            const padding = ' '.repeat(Math.floor((this.BOX_WIDTH - line.length) / 2));
-            console.log(
-                chalk.blue(this.BOX_VERTICAL) +
-                padding +
-                line +
-                ' '.repeat(this.BOX_WIDTH - line.length - padding.length) +
-                chalk.blue(this.BOX_VERTICAL)
-            );
-        });
+  public static showError(message: string): void {
+    console.log(chalk.red('✗'), message);
+  }
 
-        // Bottom border
-        console.log(
-            chalk.blue(
-                this.BOX_CORNER_BL +
-                this.BOX_CHAR.repeat(this.BOX_WIDTH) +
-                this.BOX_CORNER_BR
-            )
-        );
-    }
+  public static showWarning(message: string): void {
+    console.log(chalk.yellow('⚠'), message);
+  }
 
-    public static drawProgressBar(percent: number): void {
-        const width = 30;
-        const filled = Math.floor(width * (percent / 100));
-        const empty = width - filled;
+  public static drawBox(title: string, content: string[]): void {
+    const titleLine = this._centerText(title, this._boxWidth);
+    const topBorder =
+      this._boxCornerTl + this._boxChar.repeat(this._boxWidth - 2) + this._boxCornerTr;
+    const bottomBorder =
+      this._boxCornerBl + this._boxChar.repeat(this._boxWidth - 2) + this._boxCornerBr;
 
-        const bar = chalk.green('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
-        console.log(`\n${bar} ${percent}%\n`);
-    }
+    console.log('\n' + topBorder);
+    console.log(this._boxVertical + titleLine + this._boxVertical);
+    console.log(this._boxVertical + this._boxChar.repeat(this._boxWidth - 2) + this._boxVertical);
 
-    public static async drawSpinner(message: string, duration: number): Promise<void> {
-        const spinner = ora({
-            text: message,
-            color: 'blue'
-        }).start();
+    content.forEach(line => {
+      const paddedLine = this._padText(line, this._boxWidth - 2);
+      console.log(this._boxVertical + paddedLine + this._boxVertical);
+    });
 
-        await new Promise(resolve => setTimeout(resolve, duration));
-        spinner.succeed('Terminé');
-    }
+    console.log(bottomBorder + '\n');
+  }
+  /* eslint-enable no-console */
 
-    public static formatAmount(amount: number): string {
-        return new Intl.NumberFormat('fr-MG', {
-            style: 'currency',
-            currency: 'MGA'
-        }).format(amount);
-    }
+  public static formatAmount(amount: number): string {
+    return new Intl.NumberFormat('fr-MG', {
+      style: 'currency',
+      currency: 'MGA',
+    }).format(amount);
+  }
 
-    public static formatDate(date: Date): string {
-        return new Intl.DateTimeFormat('fr-MG', {
-            dateStyle: 'medium',
-            timeStyle: 'short'
-        }).format(date);
-    }
+  public static async drawSpinner(message: string, duration: number): Promise<void> {
+    const spinner = ora(message).start();
+    await new Promise(resolve => setTimeout(resolve, duration));
+    spinner.succeed();
+  }
 
-    public static showError(message: string): void {
-        console.log(chalk.red(`\n❌ ${message}\n`));
-    }
+  private static _centerText(text: string, width: number): string {
+    const padding = Math.max(0, width - 2 - text.length);
+    const leftPad = Math.floor(padding / 2);
+    const rightPad = padding - leftPad;
+    return ' '.repeat(leftPad) + text + ' '.repeat(rightPad);
+  }
 
-    public static showSuccess(message: string): void {
-        console.log(chalk.green(`\n✅ ${message}\n`));
-    }
-
-    public static showInfo(message: string): void {
-        console.log(chalk.blue(`\nℹ️  ${message}\n`));
-    }
-} 
+  private static _padText(text: string, width: number): string {
+    return text.padEnd(width);
+  }
+}

@@ -1,14 +1,20 @@
 {
-  "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "@typescript-eslint",
-    "prettier"
-  ],
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended"
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint"
   ],
   "rules": {
     "@typescript-eslint/naming-convention": [
@@ -44,22 +50,26 @@
         "leadingUnderscore": "require"
       },
       {
-        "selector": "typeLike",
-        "format": [
-          "PascalCase"
-        ]
-      },
-      {
-        "selector": "interface",
-        "format": [
-          "PascalCase"
+        "selector": "memberLike",
+        "modifiers": [
+          "protected"
         ],
-        "prefix": [
-          "I"
+        "format": [
+          "camelCase"
+        ],
+        "leadingUnderscore": "require"
+      },
+      {
+        "selector": "memberLike",
+        "modifiers": [
+          "public"
+        ],
+        "format": [
+          "camelCase"
         ]
       },
       {
-        "selector": "enum",
+        "selector": "typeLike",
         "format": [
           "PascalCase"
         ]
@@ -74,22 +84,23 @@
         "argsIgnorePattern": "^_"
       }
     ],
-    "prettier/prettier": "error",
     "no-console": [
       "warn",
       {
         "allow": [
+          "log",
           "warn",
           "error"
         ]
       }
     ],
-    "no-debugger": "error",
-    "no-duplicate-imports": "error",
-    "no-unused-expressions": "error",
-    "no-var": "error",
     "prefer-const": "error",
-    "prefer-arrow-callback": "error",
-    "prefer-template": "error"
+    "no-var": "error",
+    "arrow-body-style": [
+      "error",
+      "as-needed"
+    ],
+    "no-constant-condition": "error",
+    "no-duplicate-imports": "error"
   }
 }

@@ -1,40 +1,42 @@
-export interface Menu {
-    message: string;
-    handleInput(input: string): void;
-    getOptions(): string[];
-    display(): void;
+export interface IMenu {
+  readonly message: string;
+  getOptions(): string[];
+  handleInput(input: string): void;
+  display(): void;
 }
 
-export interface MenuOption {
-    label: string;
-    action: () => void;
+export interface IMenuOption {
+  id: number;
+  label: string;
+  action: () => void;
 }
 
 export class MenuService {
-    private currentMenu: Menu;
-    private menuStack: Menu[] = [];
+  private _currentMenu: IMenu;
+  private _menuStack: IMenu[] = [];
 
-    constructor(initialMenu: Menu) {
-        this.currentMenu = initialMenu;
-    }
+  public constructor(initialMenu: IMenu) {
+    this._currentMenu = initialMenu;
+    this._menuStack.push(initialMenu);
+  }
 
-    public navigateTo(menu: Menu): void {
-        this.menuStack.push(this.currentMenu);
-        this.currentMenu = menu;
-    }
+  public getCurrentMenu(): IMenu {
+    return this._currentMenu;
+  }
 
-    public goBack(): void {
-        const previousMenu = this.menuStack.pop();
-        if (previousMenu) {
-            this.currentMenu = previousMenu;
-        }
-    }
+  public navigateTo(menu: IMenu): void {
+    this._menuStack.push(menu);
+    this._currentMenu = menu;
+  }
 
-    public getCurrentMenu(): Menu {
-        return this.currentMenu;
+  public goBack(): void {
+    if (this._menuStack.length > 1) {
+      this._menuStack.pop();
+      this._currentMenu = this._menuStack[this._menuStack.length - 1];
     }
+  }
 
-    public handleInput(input: string): void {
-        this.currentMenu.handleInput(input);
-    }
-} 
+  public handleInput(input: string): void {
+    this._currentMenu.handleInput(input);
+  }
+}

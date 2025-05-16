@@ -1,393 +1,364 @@
-import { Menu } from './Menu';
-import { MenuService } from './Menu';
+import { IMenu, MenuService } from './Menu';
 import { UI } from './UI';
 import { BankAccount } from '../banking/BankAccount';
 import { InputValidator } from './SessionManager';
 import readlineSync from 'readline-sync';
 
-export class BuyCreditMenu implements Menu {
-    private readonly options = [
-        'Acheter crédit',
-        'Offre Yas',
-        'Retour'
+export class BuyCreditMenu implements IMenu {
+  private readonly _options = ['Acheter crédit', 'Offre Yas', 'Retour'];
+
+  public constructor(
+    private readonly _menuService: MenuService,
+    private readonly _account: BankAccount
+  ) {}
+
+  public get message(): string {
+    return 'Acheter crédit ou Offre Yas';
+  }
+
+  public getOptions(): string[] {
+    return this._options;
+  }
+
+  public handleInput(input: string): void {
+    const choice = parseInt(input, 10);
+
+    if (isNaN(choice) || choice < 1 || choice > this._options.length) {
+      UI.showError('Option invalide. Veuillez réessayer.');
+      return;
+    }
+
+    switch (choice) {
+      case 1:
+        this._buyCredit();
+        break;
+      case 2:
+        this._buyYasOffer();
+        break;
+      case 3:
+        this._menuService.goBack();
+        break;
+    }
+  }
+
+  private async _buyCredit(): Promise<void> {
+    let amount: number;
+    do {
+      amount = readlineSync.questionInt('Entrez le montant à acheter: ');
+    } while (!InputValidator.validateAmount(amount));
+
+    try {
+      await UI.drawSpinner('Achat en cours...', 2000);
+      this._account.deposit(amount);
+      UI.showSuccess(`Crédit de ${UI.formatAmount(amount)} acheté avec succès!`);
+    } catch (error) {
+      UI.showError("Erreur lors de l'achat du crédit.");
+    }
+  }
+
+  private async _buyYasOffer(): Promise<void> {
+    const offers = [
+      'Offre 1: 1000 Ar - 1 Go',
+      'Offre 2: 2000 Ar - 2 Go',
+      'Offre 3: 5000 Ar - 5 Go',
     ];
 
-    constructor(
-        private menuService: MenuService,
-        private account: BankAccount
-    ) { }
+    UI.drawBox('Offres Yas disponibles', offers);
+    let choice: number;
+    do {
+      choice = readlineSync.questionInt('Choisissez une offre (1-3): ');
+    } while (choice < 1 || choice > 3);
 
-    public get message(): string {
-        return 'Acheter crédit ou Offre Yas';
+    try {
+      await UI.drawSpinner("Activation de l'offre...", 2000);
+      const amount = choice * 1000;
+      this._account.deposit(amount);
+      UI.showSuccess(`Offre Yas de ${UI.formatAmount(amount)} activée avec succès!`);
+    } catch (error) {
+      UI.showError("Erreur lors de l'activation de l'offre.");
     }
+  }
 
-    public getOptions(): string[] {
-        return this.options;
-    }
-
-    public handleInput(input: string): void {
-        const choice = parseInt(input, 10);
-
-        if (isNaN(choice) || choice < 1 || choice > this.options.length) {
-            UI.showError('Option invalide. Veuillez réessayer.');
-            return;
-        }
-
-        switch (choice) {
-            case 1:
-                this.buyCredit();
-                break;
-            case 2:
-                this.buyYasOffer();
-                break;
-            case 3:
-                this.menuService.goBack();
-                break;
-        }
-    }
-
-    private async buyCredit(): Promise<void> {
-        let amount: number;
-        do {
-            amount = readlineSync.questionInt('Entrez le montant à acheter: ');
-        } while (!InputValidator.validateAmount(amount));
-
-        try {
-            await UI.drawSpinner('Achat en cours...', 2000);
-            this.account.deposit(amount);
-            UI.showSuccess(`Crédit de ${UI.formatAmount(amount)} acheté avec succès!`);
-        } catch (error) {
-            UI.showError('Erreur lors de l\'achat du crédit.');
-        }
-    }
-
-    private async buyYasOffer(): Promise<void> {
-        const offers = [
-            'Offre 1: 1000 Ar - 1 Go',
-            'Offre 2: 2000 Ar - 2 Go',
-            'Offre 3: 5000 Ar - 5 Go'
-        ];
-
-        UI.drawBox('Offres Yas disponibles', offers);
-        let choice: number;
-        do {
-            choice = readlineSync.questionInt('Choisissez une offre (1-3): ');
-        } while (choice < 1 || choice > 3);
-
-        try {
-            await UI.drawSpinner('Activation de l\'offre...', 2000);
-            const amount = choice * 1000;
-            this.account.deposit(amount);
-            UI.showSuccess(`Offre Yas de ${UI.formatAmount(amount)} activée avec succès!`);
-        } catch (error) {
-            UI.showError('Erreur lors de l\'activation de l\'offre.');
-        }
-    }
-
-    public display(): void {
-        UI.drawBox(this.message, this.options.map((opt, index) => `${index + 1}. ${opt}`));
-    }
+  public display(): void {
+    UI.drawBox(
+      this.message,
+      this._options.map((opt, index) => `${index + 1}. ${opt}`)
+    );
+  }
 }
 
-export class TransferMenu implements Menu {
-    private readonly options = [
-        'Vers un numéro MVola',
-        'Vers un compte bancaire',
-        'Retour'
-    ];
+export class TransferMenu implements IMenu {
+  private readonly _options = ['Vers un numéro MVola', 'Vers un compte bancaire', 'Retour'];
 
-    constructor(
-        private menuService: MenuService,
-        private account: BankAccount
-    ) { }
+  public constructor(
+    private readonly _menuService: MenuService,
+    private readonly _account: BankAccount
+  ) {}
 
-    public get message(): string {
-        return 'Transférer argent';
+  public get message(): string {
+    return 'Transférer argent';
+  }
+
+  public getOptions(): string[] {
+    return this._options;
+  }
+
+  public handleInput(input: string): void {
+    const choice = parseInt(input, 10);
+
+    if (isNaN(choice) || choice < 1 || choice > this._options.length) {
+      UI.showError('Option invalide. Veuillez réessayer.');
+      return;
     }
 
-    public getOptions(): string[] {
-        return this.options;
+    switch (choice) {
+      case 1:
+        this._transferToMvola();
+        break;
+      case 2:
+        this._transferToBank();
+        break;
+      case 3:
+        this._menuService.goBack();
+        break;
     }
+  }
 
-    public handleInput(input: string): void {
-        const choice = parseInt(input, 10);
+  private async _transferToMvola(): Promise<void> {
+    let recipient: string;
+    do {
+      recipient = readlineSync.question('Numéro MVola du destinataire: ');
+    } while (!InputValidator.validatePhoneNumber(recipient));
 
-        if (isNaN(choice) || choice < 1 || choice > this.options.length) {
-            UI.showError('Option invalide. Veuillez réessayer.');
-            return;
-        }
+    let amount: number;
+    do {
+      amount = readlineSync.questionInt('Montant à transférer: ');
+    } while (!InputValidator.validateAmount(amount));
 
-        switch (choice) {
-            case 1:
-                this.transferToMvola();
-                break;
-            case 2:
-                this.transferToBank();
-                break;
-            case 3:
-                this.menuService.goBack();
-                break;
-        }
+    try {
+      await UI.drawSpinner('Transfert en cours...', 2000);
+      this._account.transfer(amount, recipient);
+      UI.showSuccess(`Transfert de ${UI.formatAmount(amount)} effectué avec succès!`);
+    } catch (error) {
+      UI.showError('Erreur lors du transfert.');
     }
+  }
 
-    private async transferToMvola(): Promise<void> {
-        let recipient: string;
-        do {
-            recipient = readlineSync.question('Numéro MVola du destinataire: ');
-        } while (!InputValidator.validatePhoneNumber(recipient));
+  private async _transferToBank(): Promise<void> {
+    let accountNumber: string;
+    do {
+      accountNumber = readlineSync.question('Numéro de compte bancaire: ');
+    } while (!InputValidator.validateAccountNumber(accountNumber));
 
-        let amount: number;
-        do {
-            amount = readlineSync.questionInt('Montant à transférer: ');
-        } while (!InputValidator.validateAmount(amount));
+    let amount: number;
+    do {
+      amount = readlineSync.questionInt('Montant à transférer: ');
+    } while (!InputValidator.validateAmount(amount));
 
-        try {
-            await UI.drawSpinner('Transfert en cours...', 2000);
-            this.account.transfer(amount, recipient);
-            UI.showSuccess(`Transfert de ${UI.formatAmount(amount)} effectué avec succès!`);
-        } catch (error) {
-            UI.showError('Erreur lors du transfert.');
-        }
+    try {
+      await UI.drawSpinner('Transfert en cours...', 2000);
+      this._account.transfer(amount, accountNumber);
+      UI.showSuccess(`Transfert de ${UI.formatAmount(amount)} effectué avec succès!`);
+    } catch (error) {
+      UI.showError('Erreur lors du transfert.');
     }
+  }
 
-    private async transferToBank(): Promise<void> {
-        let accountNumber: string;
-        do {
-            accountNumber = readlineSync.question('Numéro de compte bancaire: ');
-        } while (!InputValidator.validateAccountNumber(accountNumber));
-
-        let amount: number;
-        do {
-            amount = readlineSync.questionInt('Montant à transférer: ');
-        } while (!InputValidator.validateAmount(amount));
-
-        try {
-            await UI.drawSpinner('Transfert en cours...', 2000);
-            this.account.transfer(amount, accountNumber);
-            UI.showSuccess(`Transfert de ${UI.formatAmount(amount)} effectué avec succès!`);
-        } catch (error) {
-            UI.showError('Erreur lors du transfert.');
-        }
-    }
-
-    public display(): void {
-        UI.drawBox(this.message, this.options.map((opt, index) => `${index + 1}. ${opt}`));
-    }
+  public display(): void {
+    UI.drawBox(
+      this.message,
+      this._options.map((opt, index) => `${index + 1}. ${opt}`)
+    );
+  }
 }
 
-export class MvolaCreditMenu implements Menu {
-    private readonly options = [
-        'Demander un crédit',
-        'Rembourser un crédit',
-        'Voir mes crédits',
-        'Retour'
-    ];
+export class MvolaCreditMenu implements IMenu {
+  private readonly _options = [
+    'Demander un crédit',
+    'Rembourser un crédit',
+    'Voir mes crédits',
+    'Retour',
+  ];
 
-    constructor(
-        private menuService: MenuService,
-        private account: BankAccount
-    ) { }
+  public constructor(
+    private readonly _menuService: MenuService,
+    private readonly _account: BankAccount
+  ) {}
 
-    public get message(): string {
-        return 'Mvola Credit ou Epargne';
+  public get message(): string {
+    return 'Mvola Credit ou Epargne';
+  }
+
+  public getOptions(): string[] {
+    return this._options;
+  }
+
+  public handleInput(input: string): void {
+    const choice = parseInt(input, 10);
+
+    if (isNaN(choice) || choice < 1 || choice > this._options.length) {
+      UI.showError('Option invalide. Veuillez réessayer.');
+      return;
     }
 
-    public getOptions(): string[] {
-        return this.options;
+    switch (choice) {
+      case 1:
+        this._requestCredit();
+        break;
+      case 2:
+        this._repayCredit();
+        break;
+      case 3:
+        this._viewCredits();
+        break;
+      case 4:
+        this._menuService.goBack();
+        break;
     }
+  }
 
-    public handleInput(input: string): void {
-        const choice = parseInt(input, 10);
+  private async _requestCredit(): Promise<void> {
+    let amount: number;
+    do {
+      amount = readlineSync.questionInt('Montant du crédit souhaité: ');
+    } while (!InputValidator.validateAmount(amount));
 
-        if (isNaN(choice) || choice < 1 || choice > this.options.length) {
-            UI.showError('Option invalide. Veuillez réessayer.');
-            return;
-        }
-
-        switch (choice) {
-            case 1:
-                this.requestCredit();
-                break;
-            case 2:
-                this.repayCredit();
-                break;
-            case 3:
-                this.viewCredits();
-                break;
-            case 4:
-                this.menuService.goBack();
-                break;
-        }
+    try {
+      await UI.drawSpinner('Demande de crédit en cours...', 2000);
+      this._account.deposit(amount);
+      UI.showSuccess(`Crédit de ${UI.formatAmount(amount)} accordé avec succès!`);
+    } catch (error) {
+      UI.showError('Erreur lors de la demande de crédit.');
     }
+  }
 
-    private async requestCredit(): Promise<void> {
-        let amount: number;
-        do {
-            amount = readlineSync.questionInt('Montant du crédit souhaité: ');
-        } while (!InputValidator.validateAmount(amount));
+  private async _repayCredit(): Promise<void> {
+    let amount: number;
+    do {
+      amount = readlineSync.questionInt('Montant à rembourser: ');
+    } while (!InputValidator.validateAmount(amount));
 
-        try {
-            await UI.drawSpinner('Demande de crédit en cours...', 2000);
-            this.account.deposit(amount);
-            UI.showSuccess(`Crédit de ${UI.formatAmount(amount)} accordé avec succès!`);
-        } catch (error) {
-            UI.showError('Erreur lors de la demande de crédit.');
-        }
+    try {
+      await UI.drawSpinner('Remboursement en cours...', 2000);
+      this._account.withdraw(amount);
+      UI.showSuccess(`Remboursement de ${UI.formatAmount(amount)} effectué avec succès!`);
+    } catch (error) {
+      UI.showError('Erreur lors du remboursement.');
     }
+  }
 
-    private async repayCredit(): Promise<void> {
-        let amount: number;
-        do {
-            amount = readlineSync.questionInt('Montant à rembourser: ');
-        } while (!InputValidator.validateAmount(amount));
+  private _viewCredits(): void {
+    const balance = this._account.getBalance();
+    UI.showInfo(`Solde actuel: ${UI.formatAmount(balance)}`);
+  }
 
-        try {
-            await UI.drawSpinner('Remboursement en cours...', 2000);
-            this.account.withdraw(amount);
-            UI.showSuccess(`Remboursement de ${UI.formatAmount(amount)} effectué avec succès!`);
-        } catch (error) {
-            UI.showError('Erreur lors du remboursement.');
-        }
-    }
-
-    private viewCredits(): void {
-        const balance = this.account.getBalance();
-        const content = [
-            `Solde actuel: ${UI.formatAmount(balance)}`,
-            '',
-            '1. Retour'
-        ];
-        UI.drawBox('Mes crédits', content);
-    }
-
-    public display(): void {
-        UI.drawBox(this.message, this.options.map((opt, index) => `${index + 1}. ${opt}`));
-    }
+  public display(): void {
+    UI.drawBox(
+      this.message,
+      this._options.map((opt, index) => `${index + 1}. ${opt}`)
+    );
+  }
 }
 
-export class WithdrawMenu implements Menu {
-    private readonly options = [
-        'Retrait auprès d\'un agent',
-        'Retrait auprès d\'un distributeur',
-        'Retour'
-    ];
+export class WithdrawMenu implements IMenu {
+  private readonly _options = ['Retrait chez un agent', 'Retrait à un ATM', 'Retour'];
 
-    constructor(
-        private menuService: MenuService,
-        private account: BankAccount
-    ) { }
+  public constructor(
+    private readonly _menuService: MenuService,
+    private readonly _account: BankAccount
+  ) {}
 
-    public get message(): string {
-        return 'Retrait argent';
+  public get message(): string {
+    return 'Retrait argent';
+  }
+
+  public getOptions(): string[] {
+    return this._options;
+  }
+
+  public handleInput(input: string): void {
+    const choice = parseInt(input, 10);
+
+    if (isNaN(choice) || choice < 1 || choice > this._options.length) {
+      UI.showError('Option invalide. Veuillez réessayer.');
+      return;
     }
 
-    public getOptions(): string[] {
-        return this.options;
+    switch (choice) {
+      case 1:
+        this._withdrawFromAgent();
+        break;
+      case 2:
+        this._withdrawFromATM();
+        break;
+      case 3:
+        this._menuService.goBack();
+        break;
     }
+  }
 
-    public handleInput(input: string): void {
-        const choice = parseInt(input, 10);
+  private async _withdrawFromAgent(): Promise<void> {
+    let amount: number;
+    do {
+      amount = readlineSync.questionInt('Montant à retirer: ');
+    } while (!InputValidator.validateAmount(amount));
 
-        if (isNaN(choice) || choice < 1 || choice > this.options.length) {
-            UI.showError('Option invalide. Veuillez réessayer.');
-            return;
-        }
-
-        switch (choice) {
-            case 1:
-                this.withdrawFromAgent();
-                break;
-            case 2:
-                this.withdrawFromATM();
-                break;
-            case 3:
-                this.menuService.goBack();
-                break;
-        }
+    try {
+      await UI.drawSpinner('Retrait en cours...', 2000);
+      this._account.withdraw(amount);
+      UI.showSuccess(`Retrait de ${UI.formatAmount(amount)} effectué avec succès!`);
+    } catch (error) {
+      UI.showError('Erreur lors du retrait.');
     }
+  }
 
-    private async withdrawFromAgent(): Promise<void> {
-        let amount: number;
-        do {
-            amount = readlineSync.questionInt('Montant à retirer: ');
-        } while (!InputValidator.validateAmount(amount));
+  private async _withdrawFromATM(): Promise<void> {
+    let amount: number;
+    do {
+      amount = readlineSync.questionInt('Montant à retirer: ');
+    } while (!InputValidator.validateAmount(amount));
 
-        let agentCode: string;
-        do {
-            agentCode = readlineSync.question('Code de l\'agent: ');
-        } while (!InputValidator.validateAgentCode(agentCode));
-
-        try {
-            await UI.drawSpinner('Retrait en cours...', 2000);
-            this.account.withdraw(amount);
-            UI.showSuccess(`Retrait de ${UI.formatAmount(amount)} effectué avec succès auprès de l'agent ${agentCode}!`);
-        } catch (error) {
-            UI.showError('Erreur lors du retrait.');
-        }
+    try {
+      await UI.drawSpinner('Retrait en cours...', 2000);
+      this._account.withdraw(amount);
+      UI.showSuccess(`Retrait de ${UI.formatAmount(amount)} effectué avec succès!`);
+    } catch (error) {
+      UI.showError('Erreur lors du retrait.');
     }
+  }
 
-    private async withdrawFromATM(): Promise<void> {
-        let amount: number;
-        do {
-            amount = readlineSync.questionInt('Montant à retirer: ');
-        } while (!InputValidator.validateAmount(amount));
-
-        let atmCode: string;
-        do {
-            atmCode = readlineSync.question('Code du distributeur: ');
-        } while (!InputValidator.validateAgentCode(atmCode));
-
-        try {
-            await UI.drawSpinner('Retrait en cours...', 2000);
-            this.account.withdraw(amount);
-            UI.showSuccess(`Retrait de ${UI.formatAmount(amount)} effectué avec succès au distributeur ${atmCode}!`);
-        } catch (error) {
-            UI.showError('Erreur lors du retrait.');
-        }
-    }
-
-    public display(): void {
-        UI.drawBox(this.message, this.options.map((opt, index) => `${index + 1}. ${opt}`));
-    }
+  public display(): void {
+    UI.drawBox(
+      this.message,
+      this._options.map((opt, index) => `${index + 1}. ${opt}`)
+    );
+  }
 }
 
-export class BalanceMenu implements Menu {
-    constructor(
-        private menuService: MenuService,
-        private account: BankAccount
-    ) { }
+export class BalanceMenu implements IMenu {
+  public constructor(
+    private readonly _menuService: MenuService,
+    private readonly _account: BankAccount
+  ) {}
 
-    public get message(): string {
-        return 'Voir solde';
+  public get message(): string {
+    return 'Voir solde';
+  }
+
+  public getOptions(): string[] {
+    return ['Retour'];
+  }
+
+  public handleInput(input: string): void {
+    if (input === '1') {
+      this._menuService.goBack();
+    } else {
+      UI.showError('Option invalide. Veuillez réessayer.');
     }
+  }
 
-    public getOptions(): string[] {
-        return ['Retour'];
-    }
-
-    public handleInput(input: string): void {
-        if (input === '1') {
-            this.menuService.goBack();
-        } else {
-            UI.showError('Option invalide. Veuillez réessayer.');
-        }
-    }
-
-    public display(): void {
-        const balance = this.account.getBalance();
-        const transactions = this.account.getTransactions();
-
-        const content = [
-            `Solde actuel: ${UI.formatAmount(balance)}`,
-            '',
-            'Dernières transactions:',
-            ...transactions.slice(-5).map(t =>
-                `${UI.formatDate(t.date)} - ${t.description}: ${UI.formatAmount(t.amount)}`
-            ),
-            '',
-            '1. Retour'
-        ];
-
-        UI.drawBox(this.message, content);
-    }
-} 
+  public display(): void {
+    const balance = this._account.getBalance();
+    UI.drawBox(this.message, [`Solde actuel: ${UI.formatAmount(balance)}`, '1. Retour']);
+  }
+}

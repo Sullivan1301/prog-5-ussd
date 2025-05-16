@@ -1,91 +1,70 @@
 import { UI } from './UI';
 
 export class SessionManager {
-    private static readonly SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-    private lastActivity: number;
-    private isActive: boolean;
+  private readonly _sessionTimeout: number = 300000; // 5 minutes
+  private _lastActivity: number = Date.now();
+  private _isActive: boolean = true;
 
-    constructor() {
-        this.lastActivity = Date.now();
-        this.isActive = true;
-        this.startTimeoutCheck();
+  public constructor() {
+    this._startTimeoutCheck();
+  }
+
+  public checkSession(): boolean {
+    if (!this._isActive) {
+      return false;
     }
 
-    public updateActivity(): void {
-        this.lastActivity = Date.now();
+    const now = Date.now();
+    if (now - this._lastActivity > this._sessionTimeout) {
+      this._endSession();
+      return false;
     }
 
-    public checkSession(): boolean {
-        if (!this.isActive) {
-            return false;
-        }
+    return true;
+  }
 
-        const now = Date.now();
-        if (now - this.lastActivity > SessionManager.SESSION_TIMEOUT) {
-            this.endSession();
-            return false;
-        }
+  public updateActivity(): void {
+    this._lastActivity = Date.now();
+  }
 
-        return true;
-    }
+  private _endSession(): void {
+    this._isActive = false;
+    UI.showError('Session expirée. Veuillez vous reconnecter.');
+    process.exit(0);
+  }
 
-    private endSession(): void {
-        this.isActive = false;
-        UI.showError('Session expirée. Veuillez vous reconnecter.');
+  private _startTimeoutCheck(): void {
+    setInterval(() => {
+      if (!this.checkSession()) {
         process.exit(0);
-    }
-
-    private startTimeoutCheck(): void {
-        setInterval(() => {
-            if (!this.checkSession()) {
-                this.endSession();
-            }
-        }, 1000);
-    }
+      }
+    }, 1000);
+  }
 }
 
 export class InputValidator {
-    public static validateAmount(amount: number): boolean {
-        if (isNaN(amount) || amount <= 0) {
-            UI.showError('Le montant doit être un nombre positif.');
-            return false;
-        }
-        return true;
-    }
+  public static validatePin(pin: string): boolean {
+    return /^\d{4}$/.test(pin);
+  }
 
-    public static validatePhoneNumber(phone: string): boolean {
-        const phoneRegex = /^0[3-9][0-9]{8}$/;
-        if (!phoneRegex.test(phone)) {
-            UI.showError('Numéro de téléphone invalide. Format attendu: 0XXXXXXXXX');
-            return false;
-        }
-        return true;
-    }
+  public static validateAmount(amount: number): boolean {
+    return amount > 0 && amount <= 1000000;
+  }
 
-    public static validateAccountNumber(account: string): boolean {
-        const accountRegex = /^[0-9]{10}$/;
-        if (!accountRegex.test(account)) {
-            UI.showError('Numéro de compte invalide. Format attendu: 10 chiffres');
-            return false;
-        }
-        return true;
-    }
+  public static validatePhoneNumber(phone: string): boolean {
+    return /^\d{10}$/.test(phone);
+  }
 
-    public static validatePin(pin: string): boolean {
-        const pinRegex = /^[0-9]{4}$/;
-        if (!pinRegex.test(pin)) {
-            UI.showError('PIN invalide. Format attendu: 4 chiffres');
-            return false;
-        }
-        return true;
-    }
+  public static validateAccountNumber(account: string): boolean {
+    return /^\d{10}$/.test(account);
+  }
 
-    public static validateAgentCode(code: string): boolean {
-        const codeRegex = /^[A-Z0-9]{6}$/;
-        if (!codeRegex.test(code)) {
-            UI.showError('Code agent invalide. Format attendu: 6 caractères alphanumériques');
-            return false;
-        }
-        return true;
+  public static validateAgentCode(code: string): boolean {
+    const codeRegex = /^[A-Z0-9]{6}$/;
+    if (!codeRegex.test(code)) {
+      UI.showError('Code agent invalide. Format attendu: 6 caractères alphanumériques');
+      return false;
     }
-} 
+    return true;
+  }
+}
